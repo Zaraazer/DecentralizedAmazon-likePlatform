@@ -1,27 +1,56 @@
 {
-  "name": "Project-Title",
+  "name": "decentralized-amazon-platform",
   "version": "1.0.0",
-  "description": "",
+  "description": "A decentralized e-commerce marketplace built on blockchain technology, enabling peer-to-peer trading without intermediaries",
   "main": "index.js",
   "scripts": {
-    "test": "npx hardhat test",
     "compile": "npx hardhat compile",
-    "deploy": "npx hardhat run scripts/deploy.js --network coreTestnet"
+    "test": "npx hardhat test",
+    "deploy": "npx hardhat run scripts/deploy.js",
+    "deploy:localhost": "npx hardhat run scripts/deploy.js --network localhost",
+    "deploy:core-testnet2": "npx hardhat run scripts/deploy.js --network core_testnet2",
+    "deploy:core-mainnet": "npx hardhat run scripts/deploy.js --network core_mainnet",
+    "node": "npx hardhat node",
+    "console": "npx hardhat console",
+    "verify:core-testnet2": "npx hardhat verify --network core_testnet2",
+    "clean": "npx hardhat clean",
+    "size": "npx hardhat size-contracts"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "smart-contracts",
+    "decentralized",
+    "e-commerce",
+    "marketplace",
+    "web3",
+    "solidity"
+  ],
+  "author": "Decentralized Amazon Team",
   "license": "MIT",
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
-    "@nomiclabs/hardhat-ethers": "^2.0.0",
-    "@nomiclabs/hardhat-waffle": "^2.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
     "chai": "^4.3.7",
-    "dotenv": "^16.0.3",
-    "ethereum-waffle": "^3.0.0",
-    "ethers": "^5.0.0",
-    "hardhat": "^2.14.0"
+    "ethers": "^5.7.2",
+    "hardhat": "^2.17.1",
+    "hardhat-gas-reporter": "^1.0.9",
+    "solidity-coverage": "^0.8.2"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.8.3"
-  }
-} 
+    "@openzeppelin/contracts": "^4.9.2",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/decentralized-amazon-platform.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/decentralized-amazon-platform/issues"
+  },
+  "homepage": "https://github.com/your-username/decentralized-amazon-platform#readme"
+}
