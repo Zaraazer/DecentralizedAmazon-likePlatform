@@ -79,7 +79,7 @@ contract DecentralizedAmazonPlatform {
         uint256 _quantity,
         string memory _imageHash
     ) external {
-        require(bytes(_name).length > 0, "Product name cannot be empty");
+        require(bytes(_name).length > 0, "Product namcannot be empty");
         require(_price > 0, "Price must be greater than 0");
         require(_quantity > 0, "Quantity must be greater than 0");
         
