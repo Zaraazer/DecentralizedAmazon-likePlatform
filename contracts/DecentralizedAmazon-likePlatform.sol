@@ -13,7 +13,7 @@ contract DecentralizedAmazonPlatform {
         uint256 price;
         uint256 quantity;
         address seller;
-        bool isActive;
+        bool isAct
         string imageHash; // IPFS hash for product image
         uint256 timestamp;
     }
