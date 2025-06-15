@@ -7,7 +7,7 @@ contract DecentralizedAmazonPlatform {
     uint256 public productCounter;
     uint256 public orderCounter;
     
-    struct Product {
+    struct
         uint256 id;
         string name;
         string description;
