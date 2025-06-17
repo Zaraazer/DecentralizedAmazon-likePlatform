@@ -12,7 +12,6 @@ contract DecentralizedAmazonPlatform {
         string name;
         string description;
         uint256 price;
-        uint256 quantity;
         address seller;
         bool isAct
         string imageHash; // IPFS hash for product image
