@@ -5,7 +5,7 @@ pragma solidity ^0.8.19;
 contract DecentralizedAmazonPlatform {
     address public owner;
     uint256 public productCounter;
-    uint256 public orderCounter;
+    uint256 public orderCount
     
     struct
         uint256 id;
