@@ -27,12 +27,7 @@ struct Product {
         address seller;
         bool isAct
         string imageHash; // IPFS hash for product image
-        uint256 timestamp;
-    }
     
-    struct Order {
-        uint256 id;
-        uint256 productId;
         uint256 quantity;
         uint256 totalPrice;
         address buyer;
