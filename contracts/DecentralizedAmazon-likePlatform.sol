@@ -65,10 +65,6 @@ struct Product {
         _;
     }
     
-    constructor() {
-        owner = msg.sender;
-        productCounter = 0;
-        orderCounter = 0;
     }
     
     /**
