@@ -42,11 +42,15 @@ contract DecentralizedAmazonPlatform {
     mapping(address => uint256[]) public sellerProducts;
     mapping(address => uint256[]) public buyerOrders;
     mapping(address => uint256) public sellerBalances;
+    mapping(uint256 => uint256[]) public productOrders;
 
     event ProductListed(uint256 indexed productId, string name, uint256 price, address indexed seller);
     event ProductPurchased(uint256 indexed orderId, uint256 indexed productId, address indexed buyer, uint256 quantity);
     event OrderStatusUpdated(uint256 indexed orderId, OrderStatus status);
     event FundsWithdrawn(address indexed seller, uint256 amount);
+    event ProductUpdated(uint256 indexed productId);
+    event ProductDeactivated(uint256 indexed productId);
+    event ProductReactivated(uint256 indexed productId);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can call this function");
@@ -90,14 +94,12 @@ contract DecentralizedAmazonPlatform {
         });
 
         sellerProducts[msg.sender].push(productCounter);
-
         emit ProductListed(productCounter, _name, _price, msg.sender);
     }
 
     function purchaseProduct(uint256 _productId, uint256 _quantity) external payable {
         require(_productId > 0 && _productId <= productCounter, "Invalid product ID");
         Product storage product = products[_productId];
-
         require(product.isActive, "Product is not active");
         require(product.quantity >= _quantity, "Insufficient quantity");
         require(_quantity > 0, "Quantity must be greater than 0");
@@ -105,13 +107,11 @@ contract DecentralizedAmazonPlatform {
         uint256 totalPrice = product.price * _quantity;
         require(msg.value >= totalPrice, "Insufficient payment");
 
-        // Update product
         product.quantity -= _quantity;
         if (product.quantity == 0) {
             product.isActive = false;
         }
 
-        // Create order
         orderCounter++;
         orders[orderCounter] = Order({
             id: orderCounter,
@@ -125,15 +125,13 @@ contract DecentralizedAmazonPlatform {
         });
 
         buyerOrders[msg.sender].push(orderCounter);
+        productOrders[_productId].push(orderCounter);
 
-        // Distribute funds (2% platform fee)
         uint256 platformFee = (totalPrice * 2) / 100;
         uint256 sellerAmount = totalPrice - platformFee;
-
         sellerBalances[product.seller] += sellerAmount;
         sellerBalances[owner] += platformFee;
 
-        // Refund any excess payment
         if (msg.value > totalPrice) {
             payable(msg.sender).transfer(msg.value - totalPrice);
         }
@@ -145,8 +143,7 @@ contract DecentralizedAmazonPlatform {
         require(_orderId > 0 && _orderId <= orderCounter, "Invalid order ID");
 
         Order storage order = orders[_orderId];
-        require(order.status != OrderStatus.Delivered, "Already delivered");
-        require(order.status != OrderStatus.Cancelled, "Already cancelled");
+        require(order.status != OrderStatus.Delivered && order.status != OrderStatus.Cancelled, "Final state reached");
 
         if (_status == OrderStatus.Shipped) {
             require(msg.sender == order.seller, "Only seller can mark as shipped");
@@ -157,7 +154,6 @@ contract DecentralizedAmazonPlatform {
         } else if (_status == OrderStatus.Cancelled) {
             require(order.status == OrderStatus.Pending, "Only pending orders can be cancelled");
 
-            // Refund buyer and restore quantity
             payable(order.buyer).transfer(order.totalPrice);
             Product storage product = products[order.productId];
             product.quantity += order.quantity;
@@ -181,7 +177,44 @@ contract DecentralizedAmazonPlatform {
         emit FundsWithdrawn(msg.sender, amount);
     }
 
-    // View functions
+    // ✅ New Admin/Product Functions
+
+    function deactivateProduct(uint256 _productId) external onlyProductSeller(_productId) {
+        Product storage product = products[_productId];
+        require(product.isActive, "Already inactive");
+        product.isActive = false;
+        emit ProductDeactivated(_productId);
+    }
+
+    function reactivateProduct(uint256 _productId) external onlyProductSeller(_productId) {
+        Product storage product = products[_productId];
+        require(!product.isActive, "Already active");
+        require(product.quantity > 0, "No quantity available");
+        product.isActive = true;
+        emit ProductReactivated(_productId);
+    }
+
+    function updateProductDetails(
+        uint256 _productId,
+        string memory _name,
+        string memory _description,
+        uint256 _price,
+        string memory _imageHash
+    ) external onlyProductSeller(_productId) {
+        Product storage product = products[_productId];
+        product.name = _name;
+        product.description = _description;
+        product.price = _price;
+        product.imageHash = _imageHash;
+        emit ProductUpdated(_productId);
+    }
+
+    function emergencyWithdraw(uint256 amount) external onlyOwner {
+        payable(owner).transfer(amount);
+    }
+
+    // ✅ View Functions
+
     function getActiveProducts() external view returns (Product[] memory) {
         uint256 count = 0;
         for (uint256 i = 1; i <= productCounter; i++) {
@@ -196,6 +229,14 @@ contract DecentralizedAmazonPlatform {
             }
         }
         return active;
+    }
+
+    function getAllProducts() external view returns (Product[] memory) {
+        Product[] memory all = new Product[](productCounter);
+        for (uint256 i = 1; i <= productCounter; i++) {
+            all[i - 1] = products[i];
+        }
+        return all;
     }
 
     function getSellerProducts(address _seller) external view returns (uint256[] memory) {
@@ -218,6 +259,18 @@ contract DecentralizedAmazonPlatform {
     function getOrderDetails(uint256 _orderId) external view returns (Order memory) {
         require(_orderId > 0 && _orderId <= orderCounter, "Invalid order ID");
         return orders[_orderId];
+    }
+
+    function getAllOrdersOfProduct(uint256 _productId) external view returns (uint256[] memory) {
+        return productOrders[_productId];
+    }
+
+    function getTotalSalesOfSeller(address _seller) external view returns (uint256 totalSales) {
+        for (uint256 i = 1; i <= orderCounter; i++) {
+            if (orders[i].seller == _seller && orders[i].status == OrderStatus.Delivered) {
+                totalSales += orders[i].totalPrice;
+            }
+        }
     }
 
     receive() external payable {}
