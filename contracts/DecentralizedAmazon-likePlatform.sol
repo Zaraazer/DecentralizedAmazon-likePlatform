@@ -1,4 +1,4 @@
-// SPDX-License-Identifier:
+// SPDX-License-Identifier: mit
 pragma solidity ^0.8.19;
 
 contract DecentralizedAmazonPlatform {
@@ -275,4 +275,5 @@ contract DecentralizedAmazonPlatform {
 
     receive() external payable {}
 }
+
 
